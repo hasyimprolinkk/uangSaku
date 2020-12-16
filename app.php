@@ -48,24 +48,30 @@ function user(){
     $no = 1;
     while(!feof($fn)){
         $file = fgets($fn);
-        $data = explode("|", $file);
-        $user = $data[0];
-        $pass = trim($data[1]);
-        $ua = userAgent();
-        $agent = explode("Mozilla/5.0 (", $ua)[1];
-        $agent = explode(")", $agent)[0];
-        echo "==============================================================\n";
-        echo "USER $no : $user \n";
-        echo "USER AGENT : $agent \n";
-        echo "==============================================================\n";
-        wafCookie($user, $pass, $ua);
-        echo "Tunggu 1 Menit untuk mengganti ke akun selanjutnya . . .\n";
-        echo "Script by https://t.me/hasyimprolinkk . . .\n";
-        sleep(60);
-        $no++;
+        if (preg_match("/^#/", $file)) {
+        } else {
+            $data = explode("|", $file);
+            $user = trim($data[0]);
+            $pass = trim($data[1]);
+            $ua = userAgent();
+            $agent = explode("Mozilla/5.0 (", $ua)[1];
+            $agent = explode(")", $agent)[0];
+            echo "\n==============================================================\n";
+            echo "USER $no\t   : \e[33m$user\e[37m \n";
+            echo "User Agent : \e[33m$agent\e[37m \n";
+            echo "==============================================================\n";
+            wafCookie($user, $pass, $ua);
+            echo "\e[33mScript by https://t.me/hasyimprolinkk . . .\e[37m \n";
+            for ($i=60; $i >= 0 ; $i--) {
+                echo "\r                                                        \r"; 
+                echo "\e[33mTunggu $i detik untuk mengganti ke akun selanjutnya . . .\e[37m";
+                sleep(1);
+            }
+            $no++;
+        }
     }
-    echo "Done, Thanks You. Don't forget to Support me :)\n";
-    echo "https://t.me/hasyimprolinkk\n";
+    echo "\n\e[36mDone, Thanks You. Don't forget to Support me :)\n";
+    echo "https://t.me/hasyimprolinkk \e[37m\n";
 }
 
 function login($wafcookie, $user, $pass, $ua){
@@ -73,7 +79,7 @@ function login($wafcookie, $user, $pass, $ua){
     $data = "username=".$user."&password=".$pass;
 
     $header = array(
-        "Accept: application/json, text/javascript, */*; q=0.01".
+        "Accept: application/json, text/javascript, */*; q=0.01",
         "Accept-Language: en-US,en;q=0.9",
         "Content-Length: ". strlen($data),
         "Content-Type: application/x-www-form-urlencoded; charset=UTF-8",
@@ -100,7 +106,7 @@ function login($wafcookie, $user, $pass, $ua){
     $info = explode('","', $info)[0];
 
     if(preg_match("/Berhasil/", $info)) {
-        echo "Sukses Login\n";
+        echo "\e[32mSukses Login\e[37m\n";
         $memberCookie = array();
     
         $pecah = explode('Set-Cookie: ', $login);
@@ -114,10 +120,11 @@ function login($wafcookie, $user, $pass, $ua){
         sleep(2);
         getData($cookie, $ua);
 	} elseif (preg_match("/Gagal/", $info)) {
-        echo "Gagal login. username / password salah\n";
+        echo "\e[31mGagal login. username / password salah\e[37m\n";
     } else {
-        echo "Upps, Sepertinya situs sedang down. Silahkan coba beberapa saat lagi\n";
-        exit;
+        echo "\e[31mUpps, Sepertinya situs sedang down. Silahkan coba beberapa saat lagi\e[37m\n";
+        echo "\e[33mMencoba Login Ulang . . .\e[37m\n";
+        login($wafcookie, $user, $pass, $ua);
     }
 }
 
@@ -139,46 +146,40 @@ function getData($cookie, $ua) {
     $hasil = curl_exec($ch);
     curl_close($ch);
 
+    $nama = explode("<p class='tilte2' >", $hasil)[1];
+    $nama = explode("</p>", $nama)[0];
+    $ID = explode("<p class='idid'>",$hasil)[1];
+    $ID = explode("</p>", $ID)[0];
+    $keuntungan_total = explode('<li><a href="/index.php/Home/Member/sale.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
+    $keuntungan_total = explode('</p><p class="meme_user_xxx">Keuntungan misi</p></a></li>', $keuntungan_total)[0];
+    $saldo_tersedia = explode('<li><a href="/index.php/Home/Member/log.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
+    $saldo_tersedia = explode('</p><p class="meme_user_xxx">Saldo tersedia</p></a></li>', $saldo_tersedia)[0];
+    $keuntungan = explode('<li><a href="/index.php/Home/Member/sale/t/1.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
+    $keuntungan = explode('</p><p class="meme_user_xxx">Keuntungan hari ini</p></a></li></ul>', $keuntungan)[0];
+    $misi = explode('<ul><li><p class="meme_user_xx">', $hasil)[1];
+    $misi = explode('</p><p class="meme_user_xxx">Misi yang bisa dilakukan</p></li>', $misi)[0];
+    $misi_selesai = explode("<span class='right'>Misi selesai:<b>", $hasil)[1];
+    $misi_selesai = explode('</b></span></p>', $misi_selesai)[0];
+
     echo "==============================================================\n";
     echo "\t\t\tDETAIL AKUN ANDA\n";
     echo "==============================================================\n";
-    $nama = explode("<p class='tilte2' >", $hasil)[1];
-    $nama = explode("</p>", $nama)[0];
     echo "Name\t\t\t: " . $nama;
-
-    $ID = explode("<p class='idid'>",$hasil)[1];
-    $ID = explode("</p>", $ID)[0];
     echo "\nID\t\t\t: " . $ID;
-
-    $keuntungan_total = explode('<li><a href="/index.php/Home/Member/sale.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
-    $keuntungan_total = explode('</p><p class="meme_user_xxx">Keuntungan misi</p></a></li>', $keuntungan_total)[0];
     echo "\nKeuntungan Total\t: " . $keuntungan_total;
-
-    $saldo_tersedia = explode('<li><a href="/index.php/Home/Member/log.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
-    $saldo_tersedia = explode('</p><p class="meme_user_xxx">Saldo tersedia</p></a></li>', $saldo_tersedia)[0];
     echo "\nSaldo Tersedia\t\t: " . $saldo_tersedia;
-
-    $keuntungan = explode('<li><a href="/index.php/Home/Member/sale/t/1.html" style="display: block;"><p class="meme_user_xx">', $hasil)[1];
-    $keuntungan = explode('</p><p class="meme_user_xxx">Keuntungan hari ini</p></a></li></ul>', $keuntungan)[0];
     echo "\nKeuntungan Hari ini\t: " . $keuntungan;
-
-    $misi = explode('<ul><li><p class="meme_user_xx">', $hasil)[1];
-    $misi = explode('</p><p class="meme_user_xxx">Misi yang bisa dilakukan</p></li>', $misi)[0];
     echo "\nSisa misi hari ini\t: " . $misi;
-
-    $misi_selesai = explode("<span class='right'>Misi selesai:<b>", $hasil)[1];
-    $misi_selesai = explode('</b></span></p>', $misi_selesai)[0];
     echo "\nMisi Selesai\t\t: " . $misi_selesai;
     echo "\n";
     echo "==============================================================\n";
 
     if($misi === "0" || $misi === 0) {
-        echo "Tidak Ada misi hari ini / Misi sudah Selesai.\n";
-        echo "==============================================================\n";
-        //exit; die;
+        echo "\t\e[33mTidak Ada misi hari ini / Misi sudah Selesai.\e[37m\n";
+            echo "==============================================================\n";
     } else {
         sleep(1);
-        echo ". . . Sedang Mengambil Misi . . .\n";
+        echo "\t\t\e[32m. . . Sedang Mengambil Misi . . .\e[37m\n";
         echo "==============================================================\n";
         getMisi($cookie, $ua);
     }
@@ -194,13 +195,13 @@ function getMisi($cookie, $ua, $audit = 0){
         "Content-Length: ". strlen($data),
         "Cookie: ". $cookie,
         "Origin: https://app.a123456b.com",
-        "Referer: https://app.a123456b.com/index.php/Home/Task/lists_lb/lb/1.html",
+        "Referer: https://app.a123456b.com/index.php/Home/Task/lists_lb/lb/3.html",
         "User-Agent: ". $ua,
         "X-Requested-With: XMLHttpRequest"
     );
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://app.a123456b.com/index.php/Home/Task/lists_lb.html?lb=1");
+    curl_setopt($ch, CURLOPT_URL, "https://app.a123456b.com/index.php/Home/Task/lists_lb.html?lb=3");
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
@@ -216,14 +217,14 @@ function getMisi($cookie, $ua, $audit = 0){
     if($dataid === "" || $dataid === null || empty($dataid)){
         $audit += 1;
         if ($audit === 3) {
-            echo "Gagal 3x, Kembali ke awal . . .\n"; sleep(1);
+            echo "\e[31mGagal 3x, Kembali ke awal . . .\e[37m\n"; sleep(1);
             getData($cookie, $ua);
         } else {
-            echo "Tidak ada Respon, Sedang mengulang . . .\n"; sleep(1);
+            echo "\e[31mTidak ada Respon, Sedang mengulang . . .\e[37m\n"; sleep(1);
             getMisi($cookie, $ua, $audit);
         }
     } else {
-        echo "Data ID : ". $dataid . "\n";
+        echo "Data ID\t: \e[32m". $dataid . "\e[37m\n";
         ambilMisi($cookie, $dataid, $ua);
     }
 
@@ -261,37 +262,43 @@ function ambilMisi($cookie, $dataid, $ua, $audit = 0){
     $url = explode('"url":"', $hasil)[1];
     $url = explode('"}', $url)[0];
 
-    echo "Info : " . $info . "\n";
     if ($info === "" || $info === null || empty($info)){
         $audit += 1;
         if ($audit === 3) {
-            echo "Gagal 3x, Kembali ke awal . . .\n"; sleep(1);
+            echo "\e[31mGagal 3x, Kembali ke awal . . .\e[37m\n"; sleep(1);
             getData($cookie, $ua);
         } else {
-            echo "Gagal Mengambil Misi, Sedang Mengulang . . .\n"; sleep(1);
+            echo "\e[31mGagal Mengambil Misi, Sedang Mengulang . . .\e[37m\n"; sleep(1);
             ambilMisi($cookie, $dataid, $ua, $audit);
         }
     } elseif (preg_match("/Level member/", $info)) {
-        echo "Tunggu beberapa saat . . .\n";
+        echo "Info\t: \e[31mAnda hari ini telah mencapai batas maksimal!\e[37m\n";
+        echo "\e[33mTunggu beberapa saat . . .\e[37m\n";
         getData($cookie, $ua);
     } elseif (preg_match("/kadaluarsa/", $info)){
-        echo "Mematikan Script . . .\n";
+        echo "Info\t: \e[31m$info \e[37m\n";
+        echo "\e[41mMematikan Script . . .\e[37m\n";
         exit;
     } elseif (preg_match("/Anda telah/", $info)){
-        echo "Mengambil Apply-ID misi tersebut . . .\n";
+        echo "Info\t: \e[31m$info \e[37m\n";
+        echo "\e[33mMengambil Apply-ID misi tersebut . . .\e[37m\n";
         getApllyId($cookie, $ua);
     } else {
-        echo "URL : " . stripslashes($url) . "\n";
+        echo "Info\t: \e[32mBerhasil Mengambil Apply-ID \e[36m($info) \e[37m\n";
+        echo "URL\t: \e[32m" . stripslashes($url) . "\e[37m\n";
         sleep(1);
-        echo "Sedang Mengambil Misi, Tunggu beberapa saat . . .\n";
-        sleep(10);
+        for ($i=5; $i >= 0; $i--) { 
+            echo "\r                                                    \r";
+            echo "\e[33mSedang Claim Misi, Tunggu $i detik . . .\e[37m";
+            sleep(1);
+        }
         claimMisi($cookie, $info, $ua);
     }
 }
 
 function getApllyId($cookie, $ua){
     sleep(1);
-    $data = "r=ajax&page=1&tlb=0&pd=0";
+    $data = "r=ajax&page=1&tlb=&pd=0";
 
     $header = array(
         "Accept: text/plain, */*; q=0.01",
@@ -299,13 +306,13 @@ function getApllyId($cookie, $ua){
         "Content-Length: ". strlen($data),
         "Cookie: " . $cookie,
         "Origin: https://app.a123456b.com",
-        "Referer: https://app.a123456b.com/index.php/Home/Task/lists_lb/lb/1.html",
+        "Referer: https://app.a123456b.com/index.php/Home/Task/lists_lb/lb/3.html",
         "User-Agent: " . $ua,
         "X-Requested-With: XMLHttpRequest"
     );
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://app.a123456b.com/index.php/Home/Task/lists_lb.html?lb=1");
+    curl_setopt($ch, CURLOPT_URL, "https://app.a123456b.com/index.php/Home/Task/lists_lb.html?lb=3");
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
@@ -318,14 +325,17 @@ function getApllyId($cookie, $ua){
     $applyid = explode("apply-id='", $hasil)[1];
     $applyid = explode("' style=", $applyid)[0];
 
-    echo "Apply-ID : " .$applyid . "\n";
-    echo "Tunggu beberapa saat . . .\n";
-    sleep(5);
+    echo "Info\t: \e[32mBerhasil Mengambil Apply-ID \e[36m($applyid)\e[37m\n";
+    for ($i=5; $i >= 0; $i--) { 
+        echo "\r                                \r";
+        echo "\e[33mSedang Claim Misi, Tunggu $i detik . . .\e[37m";
+        sleep(1);
+    }
     claimMisi($cookie, $applyid, $ua);
 }
 
 function claimMisi($cookie, $applyid, $ua){
-    
+    echo "\n";
     $data = "id=".$applyid;
 
     $headers = array(
@@ -354,7 +364,7 @@ function claimMisi($cookie, $applyid, $ua){
     $info = explode('"info":"', $claim)[1];
     $info = explode('","', $info)[0];
 
-    echo "Keterangan : " . $info . "\n";
+    echo "Keterangan : \e[32m$info\e[37m \n";
     echo "==============================================================\n";
     sleep(3);
     getMisi($cookie, $ua);
